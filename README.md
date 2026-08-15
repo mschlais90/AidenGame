@@ -8,11 +8,15 @@ Built to be icon-only (no reading required), touch-first, and to run on a tablet
 ## How it plays
 
 - **🪙 Play** — coins drift in one at a time. Tap a coin, it goes into the counter.
-- **🛒 Shop** — 26 animals from a caterpillar (3 coins) up to a dragon (400 coins).
+- **🛒 Shop** — 26 animals from a caterpillar (100 coins) up to a dragon (2000 coins).
   Affordable ones bounce; the rest are dimmed. Tapping one asks ✔️ / ✖️ to confirm.
 - **🏡 My Animals** — everything bought so far. Tapping an animal makes it wiggle and chirp.
 
-Progress is saved in the browser on that device (`localStorage`). No accounts, no server data.
+Everyone starts with 0 coins. Progress is saved in the browser on that device
+(`localStorage`) under the key `aidenGame.v2`. No accounts, no server data.
+
+At the default coin speed (one every 10 seconds) the first animal takes about 17 minutes
+of play. Turn the coin speed down in parent settings if that is too slow for him.
 
 ## Parent settings
 

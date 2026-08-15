@@ -4,38 +4,39 @@
 
   // ---------- Things you can buy ----------
   var ANIMALS = [
-    { id: 'caterpillar', emoji: '🐛', price: 3 },
-    { id: 'fish', emoji: '🐠', price: 4 },
-    { id: 'chick', emoji: '🐤', price: 5 },
-    { id: 'mouse', emoji: '🐭', price: 6 },
-    { id: 'frog', emoji: '🐸', price: 8 },
-    { id: 'bunny', emoji: '🐰', price: 10 },
-    { id: 'kitten', emoji: '🐱', price: 12 },
-    { id: 'puppy', emoji: '🐶', price: 15 },
-    { id: 'turtle', emoji: '🐢', price: 18 },
-    { id: 'parrot', emoji: '🦜', price: 22 },
-    { id: 'pig', emoji: '🐷', price: 26 },
-    { id: 'sheep', emoji: '🐑', price: 30 },
-    { id: 'horse', emoji: '🐴', price: 36 },
-    { id: 'cow', emoji: '🐮', price: 42 },
-    { id: 'penguin', emoji: '🐧', price: 50 },
-    { id: 'monkey', emoji: '🐵', price: 58 },
-    { id: 'panda', emoji: '🐼', price: 68 },
-    { id: 'lion', emoji: '🦁', price: 80 },
-    { id: 'tiger', emoji: '🐯', price: 95 },
-    { id: 'elephant', emoji: '🐘', price: 110 },
-    { id: 'giraffe', emoji: '🦒', price: 130 },
-    { id: 'whale', emoji: '🐳', price: 150 },
-    { id: 'dinosaur', emoji: '🦕', price: 180 },
-    { id: 'trex', emoji: '🦖', price: 220 },
-    { id: 'unicorn', emoji: '🦄', price: 300 },
-    { id: 'dragon', emoji: '🐉', price: 400 }
+    { id: 'caterpillar', emoji: '🐛', price: 100 },
+    { id: 'fish', emoji: '🐠', price: 125 },
+    { id: 'chick', emoji: '🐤', price: 150 },
+    { id: 'mouse', emoji: '🐭', price: 180 },
+    { id: 'frog', emoji: '🐸', price: 215 },
+    { id: 'bunny', emoji: '🐰', price: 250 },
+    { id: 'kitten', emoji: '🐱', price: 300 },
+    { id: 'puppy', emoji: '🐶', price: 350 },
+    { id: 'turtle', emoji: '🐢', price: 400 },
+    { id: 'parrot', emoji: '🦜', price: 460 },
+    { id: 'pig', emoji: '🐷', price: 525 },
+    { id: 'sheep', emoji: '🐑', price: 600 },
+    { id: 'horse', emoji: '🐴', price: 675 },
+    { id: 'cow', emoji: '🐮', price: 750 },
+    { id: 'penguin', emoji: '🐧', price: 850 },
+    { id: 'monkey', emoji: '🐵', price: 950 },
+    { id: 'panda', emoji: '🐼', price: 1050 },
+    { id: 'lion', emoji: '🦁', price: 1150 },
+    { id: 'tiger', emoji: '🐯', price: 1250 },
+    { id: 'elephant', emoji: '🐘', price: 1350 },
+    { id: 'giraffe', emoji: '🦒', price: 1450 },
+    { id: 'whale', emoji: '🐳', price: 1550 },
+    { id: 'dinosaur', emoji: '🦕', price: 1650 },
+    { id: 'trex', emoji: '🦖', price: 1750 },
+    { id: 'unicorn', emoji: '🦄', price: 1875 },
+    { id: 'dragon', emoji: '🐉', price: 2000 }
   ];
 
   // ---------- Saved state ----------
-  var SAVE_KEY = 'aidenGame.v1';
+  // Bumped when prices change, so nobody carries a balance from the old economy.
+  var SAVE_KEY = 'aidenGame.v2';
   var state = {
-    coins: 0,
+    coins: 0,               // every new player starts from zero
     owned: {},              // { animalId: count }
     spawnSeconds: 10,       // parent-adjustable
     maxCoins: 6,            // parent-adjustable
