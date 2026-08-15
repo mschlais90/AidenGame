@@ -21,7 +21,11 @@ fastest setting, one coin per second, the first animal is under two minutes away
 
 ## Parent settings
 
-Press and hold the ⚙️ in the top-right corner for **1.5 seconds**. From there you can set:
+Press and **hold** the ⚙️ in the top-right corner for **1.5 seconds** — a normal tap does
+nothing on purpose, so a curious 4-year-old can't get in. A green ring grows around the
+gear while you hold; when it finishes, the settings open. Let go early and it cancels.
+
+From there you can set:
 
 - **Coin speed** — one coin every 1–45 seconds (default 10)
 - **Max coins on screen** — 1–10 (default 6)

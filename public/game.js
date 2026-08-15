@@ -310,22 +310,40 @@
   var gear = $('gear');
   var settingsOverlay = $('settings');
   var gearTimer = null;
+  var gearStart = null;
 
-  function startGearHold() {
+  function startGearHold(e) {
+    e.preventDefault();
+    gearStart = { x: e.clientX, y: e.clientY };
+    // Keep receiving events even if the finger drifts off the button.
+    if (gear.setPointerCapture) {
+      try { gear.setPointerCapture(e.pointerId); } catch (err) { /* not critical */ }
+    }
+    gear.classList.remove('charging');
+    void gear.offsetWidth; // restart the ring animation
     gear.classList.add('charging');
     gearTimer = setTimeout(function () {
-      gear.classList.remove('charging');
+      cancelGearHold();
       openSettings();
     }, 1500);
   }
+
   function cancelGearHold() {
     clearTimeout(gearTimer);
+    gearStart = null;
     gear.classList.remove('charging');
   }
+
   gear.addEventListener('pointerdown', startGearHold);
   gear.addEventListener('pointerup', cancelGearHold);
-  gear.addEventListener('pointerleave', cancelGearHold);
   gear.addEventListener('pointercancel', cancelGearHold);
+  // A little wobble is fine — only a real drag away cancels the hold.
+  gear.addEventListener('pointermove', function (e) {
+    if (!gearStart) return;
+    if (Math.hypot(e.clientX - gearStart.x, e.clientY - gearStart.y) > 30) cancelGearHold();
+  });
+  // Stop the long-press menu on touch devices from eating the hold.
+  gear.addEventListener('contextmenu', function (e) { e.preventDefault(); });
 
   function showSpeed() {
     var s = state.spawnSeconds;
