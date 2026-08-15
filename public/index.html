@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#5b9dd9">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Aiden's Coin Game</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- Top bar: coin counter + hidden parent gear -->
+  <header id="topbar">
+    <div id="counter" aria-label="coins">
+      <i class="coin-icon"></i><span id="coin-count">0</span>
+    </div>
+    <button id="gear" aria-label="parent settings">⚙️</button>
+  </header>
+
+  <!-- PLAY -->
+  <section id="screen-play" class="screen active">
+    <div id="playfield"></div>
+    <div id="play-hint" class="hint">👆</div>
+  </section>
+
+  <!-- SHOP -->
+  <section id="screen-shop" class="screen">
+    <div id="shop-grid" class="grid"></div>
+  </section>
+
+  <!-- COLLECTION -->
+  <section id="screen-collection" class="screen">
+    <div id="collection-grid" class="grid"></div>
+    <div id="collection-empty" class="empty">
+      <div class="empty-emoji">🧺</div>
+      <div class="empty-arrow">🛒</div>
+    </div>
+  </section>
+
+  <!-- Bottom nav -->
+  <nav id="nav">
+    <button class="nav-btn active" data-screen="play" aria-label="play">🪙</button>
+    <button class="nav-btn" data-screen="shop" aria-label="shop">🛒</button>
+    <button class="nav-btn" data-screen="collection" aria-label="my animals">🏡</button>
+  </nav>
+
+</div>
+
+<!-- Buy confirmation -->
+<div id="confirm" class="overlay">
+  <div class="confirm-card">
+    <div id="confirm-emoji" class="confirm-emoji">🐶</div>
+    <div id="confirm-price" class="confirm-price"><i class="coin-icon"></i><span>0</span></div>
+    <div class="confirm-actions">
+      <button id="confirm-no" class="round-btn no" aria-label="no">✖️</button>
+      <button id="confirm-yes" class="round-btn yes" aria-label="yes">✔️</button>
+    </div>
+  </div>
+</div>
+
+<!-- Celebration after a purchase -->
+<div id="celebrate" class="overlay">
+  <div id="celebrate-emoji">🐶</div>
+</div>
+
+<!-- Parent settings -->
+<div id="settings" class="overlay">
+  <div class="settings-card">
+    <h2>Parent Settings</h2>
+
+    <label class="setting">
+      <span class="setting-label">Coin speed</span>
+      <input id="speed-slider" type="range" min="2" max="45" step="1" value="10">
+      <span class="setting-value">A coin every <b id="speed-value">10</b> seconds</span>
+    </label>
+
+    <label class="setting row">
+      <span class="setting-label">Sound</span>
+      <input id="sound-toggle" type="checkbox" checked>
+    </label>
+
+    <label class="setting row">
+      <span class="setting-label">Max coins on screen</span>
+      <input id="maxcoins-slider" type="range" min="1" max="10" step="1" value="6">
+      <span class="setting-value"><b id="maxcoins-value">6</b></span>
+    </label>
+
+    <div class="setting">
+      <button id="reset-btn" class="danger">Hold to reset all progress</button>
+      <div id="reset-progress"><i></i></div>
+    </div>
+
+    <button id="settings-close" class="primary">Done</button>
+  </div>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>

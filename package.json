@@ -1,0 +1,15 @@
+{
+  "name": "aiden-game",
+  "version": "1.0.0",
+  "description": "A coin-collecting animal game for little kids",
+  "main": "server.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
