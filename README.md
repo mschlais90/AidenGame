@@ -16,13 +16,14 @@ Everyone starts with 0 coins. Progress is saved in the browser on that device
 (`localStorage`) under the key `aidenGame.v2`. No accounts, no server data.
 
 At the default coin speed (one every 10 seconds) the first animal takes about 17 minutes
-of play. Turn the coin speed down in parent settings if that is too slow for him.
+of play. Turn the coin speed down in parent settings if that is too slow for him — at the
+fastest setting, one coin per second, the first animal is under two minutes away.
 
 ## Parent settings
 
 Press and hold the ⚙️ in the top-right corner for **1.5 seconds**. From there you can set:
 
-- **Coin speed** — one coin every 2–45 seconds (default 10)
+- **Coin speed** — one coin every 1–45 seconds (default 10)
 - **Max coins on screen** — 1–10 (default 6)
 - **Sound** on/off
 - **Reset progress** — requires a 2-second hold

@@ -51,7 +51,7 @@
       if (saved && typeof saved === 'object') {
         state.coins = Math.max(0, saved.coins | 0);
         state.owned = saved.owned && typeof saved.owned === 'object' ? saved.owned : {};
-        state.spawnSeconds = clamp(saved.spawnSeconds || 10, 2, 45);
+        state.spawnSeconds = clamp(saved.spawnSeconds || 10, 1, 45);
         state.maxCoins = clamp(saved.maxCoins || 6, 1, 10);
         state.sound = saved.sound !== false;
       }
@@ -327,9 +327,14 @@
   gear.addEventListener('pointerleave', cancelGearHold);
   gear.addEventListener('pointercancel', cancelGearHold);
 
+  function showSpeed() {
+    var s = state.spawnSeconds;
+    $('speed-text').innerHTML = 'A coin every <b>' + s + '</b> ' + (s === 1 ? 'second' : 'seconds');
+  }
+
   function openSettings() {
     $('speed-slider').value = state.spawnSeconds;
-    $('speed-value').textContent = state.spawnSeconds;
+    showSpeed();
     $('maxcoins-slider').value = state.maxCoins;
     $('maxcoins-value').textContent = state.maxCoins;
     $('sound-toggle').checked = state.sound;
@@ -341,8 +346,8 @@
   });
 
   $('speed-slider').addEventListener('input', function (e) {
-    state.spawnSeconds = clamp(parseInt(e.target.value, 10) || 10, 2, 45);
-    $('speed-value').textContent = state.spawnSeconds;
+    state.spawnSeconds = clamp(parseInt(e.target.value, 10) || 10, 1, 45);
+    showSpeed();
     restartSpawnTimer();
     save();
   });
