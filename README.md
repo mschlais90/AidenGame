@@ -1,13 +1,18 @@
 # Aiden's Coin Game
 
 A tap-the-coin game for a 4-year-old. Coins appear slowly on the screen, tapping one
-adds it to the counter, and coins buy animals that live on a collection page.
+adds it to the counter, and coins buy animals that live on a collection page. A silver
+5-coin nickel turns up every 20 seconds and asks a math question before it pays out.
 
 Built to be icon-only (no reading required), touch-first, and to run on a tablet.
 
 ## How it plays
 
 - **🪙 Play** — coins drift in one at a time. Tap a coin, it goes into the counter.
+- **⚪ Nickel** — every 20 seconds a bigger silver coin appears. Tapping it opens one
+  addition problem (both numbers and the answer are single digits) with three big
+  buttons to choose from. Right answer: **5 coins**. Wrong answer: nothing. Either way
+  the nickel is spent and play resumes.
 - **🛒 Shop** — 26 animals from a caterpillar (100 coins) up to a dragon (2000 coins).
   Affordable ones bounce; the rest are dimmed. Tapping one asks ✔️ / ✖️ to confirm.
 - **🏡 My Animals** — everything bought so far. Tapping an animal makes it wiggle and chirp.
@@ -67,8 +72,10 @@ full-screen with no browser chrome, which stops little fingers from wandering of
 server.js          Express static server + /healthz
 public/index.html  screens, nav, overlays
 public/styles.css  all styling and animations
-public/game.js     game state, coin spawning, shop, collection, settings
+public/game.js     game state, coin spawning, math challenge, shop, collection, settings
 render.yaml        Render blueprint
 ```
 
 Adding an animal is one line in the `ANIMALS` array in `public/game.js`.
+The nickel's timing and payout are the `NICKEL_SECONDS` and `NICKEL_REWARD` constants
+just below it.

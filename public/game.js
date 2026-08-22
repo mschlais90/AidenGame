@@ -32,6 +32,12 @@
     { id: 'dragon', emoji: '🐉', price: 2000 }
   ];
 
+  // ---------- The 5-coin nickel ----------
+  // A silver coin shows up on its own clock. Tapping it opens a one-question
+  // math quiz instead of paying out straight away.
+  var NICKEL_SECONDS = 20;   // how often a nickel tries to appear
+  var NICKEL_REWARD = 5;     // coins for a correct answer
+
   // ---------- Saved state ----------
   // Bumped when prices change, so nobody carries a balance from the old economy.
   var SAVE_KEY = 'aidenGame.v2';
@@ -177,6 +183,123 @@
       playfield.appendChild(s);
       (function (el) { setTimeout(function () { el.remove(); }, 600); })(s);
     }
+  }
+
+  // ---------- Nickel + math challenge ----------
+  var nickelTimer = null;
+  var mathOverlay = $('math');
+  var mathChoices = $('math-choices');
+  var pendingAnswer = null;   // the correct answer while the quiz is open
+  var nickelSpot = null;      // where the nickel was, so the reward bursts there
+
+  function spawnNickel() {
+    // Only ever one nickel at a time, and never while a quiz is already up.
+    if (pendingAnswer !== null) return;
+    if (playfield.querySelector('.coin.nickel')) return;
+    var rect = playfield.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+
+    var pad = 70;
+    var nickel = document.createElement('div');
+    nickel.className = 'coin nickel';
+    nickel.innerHTML = '<i class="coin-icon nickel-icon"></i>';
+    nickel.style.left = (pad + Math.random() * Math.max(1, rect.width - pad * 2)) + 'px';
+    nickel.style.top = (pad + Math.random() * Math.max(1, rect.height - pad * 2)) + 'px';
+    nickel.addEventListener('pointerdown', tapNickel);
+    playfield.appendChild(nickel);
+    playHint.classList.add('hidden');
+  }
+
+  function tapNickel(e) {
+    var nickel = e.currentTarget;
+    if (nickel.classList.contains('taken')) return;
+    // The coin is spent the moment it is tapped — right or wrong, it is gone.
+    nickel.classList.add('taken');
+    nickelSpot = { x: nickel.offsetLeft, y: nickel.offsetTop };
+    setTimeout(function () { nickel.remove(); }, 450);
+    if (navigator.vibrate) navigator.vibrate(18);
+    openMath();
+  }
+
+  function restartNickelTimer() {
+    clearInterval(nickelTimer);
+    nickelTimer = setInterval(spawnNickel, NICKEL_SECONDS * 1000);
+  }
+
+  // Single digit addition, and the answer stays single digit too (a + b <= 9).
+  function makeProblem() {
+    var a = 1 + Math.floor(Math.random() * 8);
+    var b = 1 + Math.floor(Math.random() * (9 - a));
+    return { a: a, b: b, answer: a + b };
+  }
+
+  // Two wrong answers close enough to the real one that it is a real choice.
+  function wrongAnswers(answer) {
+    var pool = [];
+    for (var n = Math.max(0, answer - 3); n <= Math.min(9, answer + 3); n++) {
+      if (n !== answer) pool.push(n);
+    }
+    shuffle(pool);
+    return pool.slice(0, 2);
+  }
+
+  function shuffle(list) {
+    for (var i = list.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = list[i];
+      list[i] = list[j];
+      list[j] = tmp;
+    }
+    return list;
+  }
+
+  function openMath() {
+    var problem = makeProblem();
+    pendingAnswer = problem.answer;
+    $('math-a').textContent = problem.a;
+    $('math-b').textContent = problem.b;
+
+    var options = shuffle(wrongAnswers(problem.answer).concat([problem.answer]));
+    mathChoices.classList.remove('answered');
+    mathChoices.innerHTML = '';
+    options.forEach(function (value) {
+      var btn = document.createElement('button');
+      btn.className = 'math-choice';
+      btn.type = 'button';
+      btn.textContent = value;
+      btn.addEventListener('click', function () { answerMath(value, btn); });
+      mathChoices.appendChild(btn);
+    });
+
+    mathOverlay.classList.add('open');
+  }
+
+  function answerMath(value, btn) {
+    if (pendingAnswer === null) return;
+    var correct = value === pendingAnswer;
+    pendingAnswer = null;
+
+    // Freeze the buttons and show what happened before closing.
+    mathChoices.classList.add('answered');
+    btn.classList.add(correct ? 'right' : 'wrong');
+
+    if (correct) {
+      state.coins += NICKEL_REWARD;
+      save();
+      renderCoins();
+      renderShop();
+      sfx.buy();
+      if (navigator.vibrate) navigator.vibrate([20, 40, 20]);
+    } else {
+      sfx.nope();
+    }
+
+    setTimeout(function () {
+      mathOverlay.classList.remove('open');
+      // Sparkle where the nickel was, so the reward lands back on the playfield.
+      if (correct && nickelSpot) burst(nickelSpot.x, nickelSpot.y);
+      nickelSpot = null;
+    }, correct ? 750 : 900);
   }
 
   function restartSpawnTimer() {
@@ -424,6 +547,7 @@
   renderShop();
   renderCollection();
   restartSpawnTimer();
+  restartNickelTimer();
   spawnCoin();          // one waiting for him right away
   setTimeout(spawnCoin, 1200);
 
@@ -431,6 +555,7 @@
   document.addEventListener('visibilitychange', function () {
     if (!document.hidden) {
       restartSpawnTimer();
+      restartNickelTimer();
       spawnCoin();
     }
   });
