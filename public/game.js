@@ -32,11 +32,26 @@
     { id: 'dragon', emoji: '🐉', price: 2000 }
   ];
 
-  // ---------- The 5-coin nickel ----------
-  // A silver coin shows up on its own clock. Tapping it opens a one-question
-  // math quiz instead of paying out straight away.
-  var NICKEL_SECONDS = 20;   // how often a nickel tries to appear
-  var NICKEL_REWARD = 5;     // coins for a correct answer
+  // ---------- The bonus coins ----------
+  // A silver 5 and a copper 10 show up on their own clocks. Tapping one opens
+  // a one-question math quiz instead of paying out straight away — the bigger
+  // the coin, the bigger the numbers.
+  var SPECIALS = {
+    nickel: {
+      seconds: 20,     // how often this coin tries to appear
+      offset: 0,       // stagger, so the two never land at the same moment
+      reward: 5,       // coins for a correct answer
+      low: 2, high: 9, // the answer always lands in this range
+      pad: 70          // keep it clear of the screen edge (it is a wide coin)
+    },
+    dime: {
+      seconds: 20,
+      offset: 10,
+      reward: 10,
+      low: 11, high: 19,
+      pad: 80
+    }
+  };
 
   // ---------- Saved state ----------
   // Bumped when prices change, so nobody carries a balance from the old economy.
@@ -185,58 +200,78 @@
     }
   }
 
-  // ---------- Nickel + math challenge ----------
-  var nickelTimer = null;
+  // ---------- Bonus coins + math challenge ----------
+  var specialTimers = {};
   var mathOverlay = $('math');
   var mathChoices = $('math-choices');
+  var pendingSpec = null;     // which coin's quiz is open
   var pendingAnswer = null;   // the correct answer while the quiz is open
-  var nickelSpot = null;      // where the nickel was, so the reward bursts there
+  var specialSpot = null;     // where the coin was, so the reward bursts there
 
-  function spawnNickel() {
-    // Only ever one nickel at a time, and never while a quiz is already up.
+  function spawnSpecial(kind) {
+    // Only ever one of each at a time, and never while a quiz is already up.
     if (pendingAnswer !== null) return;
-    if (playfield.querySelector('.coin.nickel')) return;
+    if (playfield.querySelector('.coin.' + kind)) return;
     var rect = playfield.getBoundingClientRect();
     if (!rect.width || !rect.height) return;
 
-    var pad = 70;
-    var nickel = document.createElement('div');
-    nickel.className = 'coin nickel';
-    nickel.innerHTML = '<i class="coin-icon nickel-icon"></i>';
-    nickel.style.left = (pad + Math.random() * Math.max(1, rect.width - pad * 2)) + 'px';
-    nickel.style.top = (pad + Math.random() * Math.max(1, rect.height - pad * 2)) + 'px';
-    nickel.addEventListener('pointerdown', tapNickel);
-    playfield.appendChild(nickel);
+    var pad = SPECIALS[kind].pad;
+    var coin = document.createElement('div');
+    coin.className = 'coin ' + kind;
+    coin.innerHTML = '<i class="coin-icon ' + kind + '-icon"></i>';
+    coin.style.left = (pad + Math.random() * Math.max(1, rect.width - pad * 2)) + 'px';
+    coin.style.top = (pad + Math.random() * Math.max(1, rect.height - pad * 2)) + 'px';
+    coin.addEventListener('pointerdown', function (e) { tapSpecial(e, kind); });
+    playfield.appendChild(coin);
     playHint.classList.add('hidden');
   }
 
-  function tapNickel(e) {
-    var nickel = e.currentTarget;
-    if (nickel.classList.contains('taken')) return;
+  function tapSpecial(e, kind) {
+    var coin = e.currentTarget;
+    if (coin.classList.contains('taken')) return;
     // The coin is spent the moment it is tapped — right or wrong, it is gone.
-    nickel.classList.add('taken');
-    nickelSpot = { x: nickel.offsetLeft, y: nickel.offsetTop };
-    setTimeout(function () { nickel.remove(); }, 450);
+    coin.classList.add('taken');
+    specialSpot = { x: coin.offsetLeft, y: coin.offsetTop };
+    setTimeout(function () { coin.remove(); }, 450);
     if (navigator.vibrate) navigator.vibrate(18);
-    openMath();
+    openMath(kind);
   }
 
-  function restartNickelTimer() {
-    clearInterval(nickelTimer);
-    nickelTimer = setInterval(spawnNickel, NICKEL_SECONDS * 1000);
+  // Each bonus coin runs its own clock, offset so they alternate rather than
+  // landing together. The first one is a full interval away, not immediate.
+  function restartSpecialTimers() {
+    Object.keys(SPECIALS).forEach(function (kind) {
+      var spec = SPECIALS[kind];
+      clearTimeout(specialTimers[kind + '-first']);
+      clearInterval(specialTimers[kind]);
+      specialTimers[kind + '-first'] = setTimeout(function () {
+        spawnSpecial(kind);
+        specialTimers[kind] = setInterval(function () { spawnSpecial(kind); }, spec.seconds * 1000);
+      }, (spec.offset + spec.seconds) * 1000);
+    });
   }
 
-  // Single digit addition, and the answer stays single digit too (a + b <= 9).
-  function makeProblem() {
-    var a = 1 + Math.floor(Math.random() * 8);
-    var b = 1 + Math.floor(Math.random() * (9 - a));
-    return { a: a, b: b, answer: a + b };
+  // Addition inside the coin's range. The nickel keeps the answer single digit
+  // (2–9); the dime asks for a two digit one (11–19) — sometimes 10 + a digit,
+  // sometimes two digits that carry over the ten.
+  function makeProblem(spec) {
+    var answer = spec.low + Math.floor(Math.random() * (spec.high - spec.low + 1));
+    var a;
+    if (answer > 10 && (answer > 18 || Math.random() < 0.5)) {
+      a = 10;                                     // 10 + 7 = 17
+    } else {
+      var lo = Math.max(1, answer - 9);           // both addends stay single digit
+      var hi = Math.min(9, answer - 1);
+      a = lo + Math.floor(Math.random() * (hi - lo + 1));
+    }
+    return { a: a, b: answer - a, answer: answer };
   }
 
-  // Two wrong answers close enough to the real one that it is a real choice.
-  function wrongAnswers(answer) {
+  // Two wrong answers close enough to the real one that it is a real choice,
+  // and inside the same range so a dime never offers a single digit.
+  function wrongAnswers(answer, spec) {
     var pool = [];
-    for (var n = Math.max(0, answer - 3); n <= Math.min(9, answer + 3); n++) {
+    for (var n = Math.max(spec.low, answer - 3); n <= Math.min(spec.high, answer + 3); n++) {
       if (n !== answer) pool.push(n);
     }
     shuffle(pool);
@@ -253,13 +288,20 @@
     return list;
   }
 
-  function openMath() {
-    var problem = makeProblem();
+  function openMath(kind) {
+    var spec = SPECIALS[kind];
+    var problem = makeProblem(spec);
+    pendingSpec = spec;
     pendingAnswer = problem.answer;
     $('math-a').textContent = problem.a;
     $('math-b').textContent = problem.b;
 
-    var options = shuffle(wrongAnswers(problem.answer).concat([problem.answer]));
+    // The prize badge wears the coin that was tapped.
+    $('math-prize').className = 'math-prize ' + kind;
+    $('math-prize-icon').className = 'coin-icon ' + kind + '-icon';
+    $('math-prize-value').textContent = '+' + spec.reward;
+
+    var options = shuffle(wrongAnswers(problem.answer, spec).concat([problem.answer]));
     mathChoices.classList.remove('answered');
     mathChoices.innerHTML = '';
     options.forEach(function (value) {
@@ -277,14 +319,16 @@
   function answerMath(value, btn) {
     if (pendingAnswer === null) return;
     var correct = value === pendingAnswer;
+    var reward = pendingSpec.reward;
     pendingAnswer = null;
+    pendingSpec = null;
 
     // Freeze the buttons and show what happened before closing.
     mathChoices.classList.add('answered');
     btn.classList.add(correct ? 'right' : 'wrong');
 
     if (correct) {
-      state.coins += NICKEL_REWARD;
+      state.coins += reward;
       save();
       renderCoins();
       renderShop();
@@ -296,9 +340,9 @@
 
     setTimeout(function () {
       mathOverlay.classList.remove('open');
-      // Sparkle where the nickel was, so the reward lands back on the playfield.
-      if (correct && nickelSpot) burst(nickelSpot.x, nickelSpot.y);
-      nickelSpot = null;
+      // Sparkle where the coin was, so the reward lands back on the playfield.
+      if (correct && specialSpot) burst(specialSpot.x, specialSpot.y);
+      specialSpot = null;
     }, correct ? 750 : 900);
   }
 
@@ -547,7 +591,7 @@
   renderShop();
   renderCollection();
   restartSpawnTimer();
-  restartNickelTimer();
+  restartSpecialTimers();
   spawnCoin();          // one waiting for him right away
   setTimeout(spawnCoin, 1200);
 
@@ -555,7 +599,7 @@
   document.addEventListener('visibilitychange', function () {
     if (!document.hidden) {
       restartSpawnTimer();
-      restartNickelTimer();
+      restartSpecialTimers();
       spawnCoin();
     }
   });

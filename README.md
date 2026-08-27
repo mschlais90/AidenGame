@@ -2,7 +2,8 @@
 
 A tap-the-coin game for a 4-year-old. Coins appear slowly on the screen, tapping one
 adds it to the counter, and coins buy animals that live on a collection page. A silver
-5-coin nickel turns up every 20 seconds and asks a math question before it pays out.
+5-coin nickel and a copper 10-coin dime each turn up every 20 seconds and ask a math
+question before they pay out.
 
 Built to be icon-only (no reading required), touch-first, and to run on a tablet.
 
@@ -13,6 +14,11 @@ Built to be icon-only (no reading required), touch-first, and to run on a tablet
   addition problem (both numbers and the answer are single digits) with three big
   buttons to choose from. Right answer: **5 coins**. Wrong answer: nothing. Either way
   the nickel is spent and play resumes.
+- **🟠 Dime** — every 20 seconds too, but offset by 10 so the two alternate rather than
+  landing together. It is the biggest coin on screen and copper, so it never reads as
+  the silver 5. Its problem is a step harder: the answer is always **two digits, 11–19**
+  (sometimes `10 + 7`, sometimes `8 + 6`), and all three buttons are two-digit numbers.
+  Right answer: **10 coins**.
 - **🛒 Shop** — 26 animals from a caterpillar (100 coins) up to a dragon (2000 coins).
   Affordable ones bounce; the rest are dimmed. Tapping one asks ✔️ / ✖️ to confirm.
 - **🏡 My Animals** — everything bought so far. Tapping an animal makes it wiggle and chirp.
@@ -77,5 +83,6 @@ render.yaml        Render blueprint
 ```
 
 Adding an animal is one line in the `ANIMALS` array in `public/game.js`.
-The nickel's timing and payout are the `NICKEL_SECONDS` and `NICKEL_REWARD` constants
-just below it.
+The bonus coins are the `SPECIALS` object just below it — each entry sets how often the
+coin appears (`seconds`), its stagger (`offset`), its payout (`reward`) and the range its
+answer falls in (`low`/`high`).

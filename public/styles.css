@@ -7,6 +7,8 @@
   --gold-dark: #d99f16;
   --silver: #c8d2d9;
   --silver-dark: #8d9aa3;
+  --copper: #f0a868;
+  --copper-dark: #b9642a;
   --green: #57c26a;
   --red: #ef6f6f;
   --shadow: 0 6px 0 rgba(0, 0, 0, .12);
@@ -99,6 +101,20 @@ html, body {
   text-shadow: 0 .03em 0 rgba(255, 255, 255, .9);
 }
 
+/* The 10c coin: copper, so it never gets mistaken for the silver 5. */
+.dime-icon {
+  background: radial-gradient(circle at 34% 28%, #ffe9d6 0%, #f0a868 52%, #c9722f 100%);
+  box-shadow: inset 0 0 0 .085em var(--copper-dark), 0 .05em .1em rgba(0, 0, 0, .28);
+}
+.dime-icon::after {
+  content: '10';
+  font-size: .46em;
+  font-weight: 900;
+  letter-spacing: -.02em;
+  color: #7a3f12;
+  text-shadow: 0 .03em 0 rgba(255, 235, 220, .9);
+}
+
 #gear {
   pointer-events: auto;
   width: 52px;
@@ -158,16 +174,26 @@ html, body {
 .coin .coin-icon { vertical-align: top; }
 .coin.taken { animation: taken .45s ease-out forwards; pointer-events: none; }
 
-/* The nickel is rarer, so it is bigger and glows to earn a second look. */
+/* The bonus coins are rarer, so they are bigger and glow to earn a second look. */
+.coin.nickel, .coin.dime {
+  animation: pop-in .45s cubic-bezier(.2, 1.6, .5, 1) both,
+             bob 2.4s ease-in-out .45s infinite,
+             shine 1.6s ease-in-out .45s infinite;
+}
 .coin.nickel {
   width: 112px;
   height: 112px;
   margin: -56px 0 0 -56px;
   font-size: 112px;
-  animation: pop-in .45s cubic-bezier(.2, 1.6, .5, 1) both,
-             bob 2.4s ease-in-out .45s infinite,
-             shine 1.6s ease-in-out .45s infinite;
 }
+/* The dime is worth the most, so it is the biggest of the lot. */
+.coin.dime {
+  width: 130px;
+  height: 130px;
+  margin: -65px 0 0 -65px;
+  font-size: 130px;
+}
+
 @keyframes shine {
   0%, 100% { filter: drop-shadow(0 8px 7px rgba(0, 0, 0, .3)); }
   50% { filter: drop-shadow(0 8px 7px rgba(0, 0, 0, .3)) drop-shadow(0 0 16px rgba(255, 255, 255, .95)); }
@@ -391,6 +417,10 @@ html, body {
   font-size: 28px;
   font-weight: 800;
   box-shadow: 0 4px 0 var(--silver-dark);
+}
+.math-prize.dime {
+  border-color: var(--copper);
+  box-shadow: 0 4px 0 var(--copper-dark);
 }
 
 .math-problem {
